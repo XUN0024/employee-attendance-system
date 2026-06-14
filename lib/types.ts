@@ -27,7 +27,18 @@ export interface Attendance {
     attendance_date: string;
     attendance_check_in: string;
     attendance_check_out: string | null;
-    attendance_status: 'Present' | 'Late' | 'Absent';
+    attendance_status: 'Present' | 'Late' | 'Absent' | 'Leave';
+}
+
+export interface LeaveRequest {
+    leave_id: string;
+    employee_id: string;
+    start_date: string;
+    end_date: string;
+    leave_type: 'Annual' | 'Sick' | 'Emergency' | 'Medical';
+    reason: string | null;
+    leave_status: 'Pending' | 'Approved' | 'Rejected';
+    created_at: string;
 }
 
 export interface AdminEmployeeDetails {
@@ -35,8 +46,10 @@ export interface AdminEmployeeDetails {
     employee_name: string;
     employee_email: string;
     role: 'employee' | 'admin';
+    employee_status: 'active' | 'inactive';
     department_name: string | null;
     department_code: string | null;
+    department_id: string | null;
     admin_id: string | null;
     employee_date_register: string;
 }
