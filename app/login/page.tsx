@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { User, Shield, Lock, IdCard, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { loginEmployee } from '@/lib/auth';
 
 type Role = 'employee' | 'admin';
 
@@ -22,17 +21,25 @@ export default function LoginPage() {
         setIsLoading(true);
 
         try {
-            const result = await loginEmployee({
-                employeeId,
-                password,
-                role,
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    employeeId,
+                    password,
+                    role,
+                }),
             });
 
+            const result = await response.json();
+
             if (result.success && result.employee) {
-                // Store employee info in localStorage
+                // Store minimal employee info in localStorage for client-side use
                 localStorage.setItem('employee', JSON.stringify(result.employee));
                 
-                // Redirect based on role
+                // Redirect based on role (middleware will enforce)
                 if (result.employee.role === 'admin') {
                     router.push('/admin/dashboard');
                 } else {
