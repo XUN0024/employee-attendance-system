@@ -30,6 +30,16 @@ const CLOCK_IN_END_HOUR = 18; // 6:00 PM
 const CLOCK_IN_END_MINUTE = 0;
 
 /**
+ * Get current date in local timezone as YYYY-MM-DD string
+ */
+function getLocalDateString(date: Date = new Date()): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+/**
  * Check if current time is within allowed clock in window
  */
 export function isClockInAllowed(currentTime: Date): { allowed: boolean; reason?: string } {
@@ -85,20 +95,22 @@ function calculateAttendanceStatus(checkInTime: Date): 'Present' | 'Late' {
  */
 export async function getTodayAttendance(employeeId: string): Promise<TodayAttendanceResponse> {
     try {
-        // Get current date in YYYY-MM-DD format (server-side)
-        const { data: serverTime } = await supabase.rpc('get_server_time');
-        const currentDate = serverTime ? new Date(serverTime).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+        // Get current date in local timezone
+        const currentDate = getLocalDateString();
 
         const { data, error } = await supabase
             .from('attendances')
             .select('*')
             .eq('employee_id', employeeId)
             .eq('attendance_date', currentDate)
-            .single();
+            .maybeSingle();
 
-        if (error && error.code !== 'PGRST116') {
-            // PGRST116 = no rows returned (expected if no attendance yet)
-            throw error;
+        if (error) {
+            console.error('Error fetching today attendance:', error);
+            return {
+                hasCheckedIn: false,
+                hasCheckedOut: false,
+            };
         }
 
         if (!data) {
@@ -129,10 +141,10 @@ export async function clockIn(employeeId: string): Promise<ClockInResponse> {
     try {
         // Get server timestamp first
         const serverTime = await getServerTimestamp();
+        const currentDate = getLocalDateString(serverTime);
 
         // Check if employee has approved leave today
-        const currentDate = serverTime.toISOString().split('T')[0];
-        const { data: leaveData, error: leaveError } = await supabase
+        const { data: leaveData } = await supabase
             .from('leave_requests')
             .select('leave_type')
             .eq('employee_id', employeeId)
@@ -207,10 +219,10 @@ export async function clockOut(employeeId: string): Promise<ClockOutResponse> {
     try {
         // Get server timestamp
         const serverTime = await getServerTimestamp();
-        const currentDate = serverTime.toISOString().split('T')[0];
+        const currentDate = getLocalDateString(serverTime);
 
         // Check if employee has approved leave today
-        const { data: leaveData, error: leaveError } = await supabase
+        const { data: leaveData } = await supabase
             .from('leave_requests')
             .select('leave_type')
             .eq('employee_id', employeeId)

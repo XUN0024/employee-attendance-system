@@ -37,7 +37,7 @@ export default function MarkAttendancePage() {
         const timer = setInterval(() => {
             const now = new Date();
             setCurrentTime(now);
-            
+
             // Check if clock in is allowed
             const timeCheck = isClockInAllowed(now);
             setClockInAllowed(timeCheck.allowed);
@@ -52,20 +52,25 @@ export default function MarkAttendancePage() {
     const loadTodayAttendance = async (employeeId: string) => {
         setIsLoading(true);
         try {
-            // Check for approved leave today
-            const today = new Date().toISOString().split('T')[0];
-            const { data: leaveData, error: leaveError } = await supabase
+            // Check for approved leave today - use local date
+            const today = new Date();
+            const localDateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+            const { data: leaveData } = await supabase
                 .from('leave_requests')
                 .select('leave_type')
                 .eq('employee_id', employeeId)
                 .eq('leave_status', 'Approved')
-                .lte('start_date', today)
-                .gte('end_date', today)
-                .single();
+                .lte('start_date', localDateStr)
+                .gte('end_date', localDateStr)
+                .maybeSingle();
 
-            if (!leaveError && leaveData) {
+            if (leaveData) {
                 setHasApprovedLeave(true);
                 setLeaveType(leaveData.leave_type);
+            } else {
+                setHasApprovedLeave(false);
+                setLeaveType('');
             }
 
             const status = await getTodayAttendance(employeeId);
@@ -237,13 +242,12 @@ export default function MarkAttendancePage() {
 
                 {message && (
                     <div
-                        className={`p-4 rounded-lg border flex items-start gap-3 ${
-                            message.type === 'success'
+                        className={`p-4 rounded-lg border flex items-start gap-3 ${message.type === 'success'
                                 ? 'bg-emerald-50 border-emerald-200'
                                 : message.type === 'warning'
-                                  ? 'bg-amber-50 border-amber-200'
-                                  : 'bg-red-50 border-red-200'
-                        }`}
+                                    ? 'bg-amber-50 border-amber-200'
+                                    : 'bg-red-50 border-red-200'
+                            }`}
                     >
                         {message.type === 'success' ? (
                             <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5" />
@@ -253,13 +257,12 @@ export default function MarkAttendancePage() {
                             <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
                         )}
                         <p
-                            className={`text-sm font-medium ${
-                                message.type === 'success'
+                            className={`text-sm font-medium ${message.type === 'success'
                                     ? 'text-emerald-700'
                                     : message.type === 'warning'
-                                      ? 'text-amber-700'
-                                      : 'text-red-700'
-                            }`}
+                                        ? 'text-amber-700'
+                                        : 'text-red-700'
+                                }`}
                         >
                             {message.text}
                         </p>
@@ -308,11 +311,10 @@ export default function MarkAttendancePage() {
                                     <p className="text-xs text-blue-700 mt-1">Checked in at {checkInTime}</p>
                                 </div>
                                 <span
-                                    className={`px-3 py-1 rounded-md text-xs font-medium ${
-                                        attendanceStatus === 'Present'
+                                    className={`px-3 py-1 rounded-md text-xs font-medium ${attendanceStatus === 'Present'
                                             ? 'bg-emerald-100 text-emerald-700'
                                             : 'bg-amber-100 text-amber-700'
-                                    }`}
+                                        }`}
                                 >
                                     {attendanceStatus}
                                 </span>
@@ -338,8 +340,8 @@ export default function MarkAttendancePage() {
                                     {hasApprovedLeave
                                         ? 'On leave today'
                                         : !clockInAllowed && !hasCheckedIn
-                                          ? 'Not available now'
-                                          : 'Mark your arrival'}
+                                            ? 'Not available now'
+                                            : 'Mark your arrival'}
                                 </div>
                             </div>
                         </button>

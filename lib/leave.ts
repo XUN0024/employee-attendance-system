@@ -196,13 +196,20 @@ export async function approveLeaveRequest(leaveId: string): Promise<ApproveRejec
         const endDate = new Date(leaveRequest.end_date);
         const attendanceRecords = [];
 
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        const currentDate = new Date(startDate);
+        while (currentDate <= endDate) {
+            const dateStr = currentDate.toISOString().split('T')[0];
+            const checkInTime = new Date(currentDate);
+            checkInTime.setHours(9, 0, 0, 0);
+            
             attendanceRecords.push({
                 employee_id: leaveRequest.employee_id,
-                attendance_date: d.toISOString().split('T')[0],
-                attendance_check_in: new Date(d.setHours(9, 0, 0, 0)).toISOString(),
+                attendance_date: dateStr,
+                attendance_check_in: checkInTime.toISOString(),
                 attendance_status: 'Leave',
             });
+            
+            currentDate.setDate(currentDate.getDate() + 1);
         }
 
         // Insert attendance records (ignore conflicts for existing dates)
