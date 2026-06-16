@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Employee Attendance System
+
+This project is an Employee Attendance System developed for FEIJIP Corporate Solutions. The system allows employees to log in, mark attendance, view personal attendance records, submit leave requests, and change their passwords. Administrators can manage employee accounts, approve or reject leave requests, reset passwords, and generate monthly attendance reports.
+
+The system is built using Next.js and uses Supabase as the database backend.
+
+## Main Features
+
+- Employee and administrator login
+- Role-based access control
+- Employee clock-in and clock-out
+- Server-side attendance timestamp recording
+- Attendance status classification as Present or Late
+- Duplicate clock-in and invalid clock-out prevention
+- Employee attendance history
+- Leave request submission
+- Admin leave approval and rejection
+- Employee account management
+- Manual password reset by administrator
+- Monthly attendance report generation
 
 ## Getting Started
 
-First, run the development server:
+First, install the project dependencies:
+
+```bash
+npm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open the following URL in your browser:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The system will run locally on port 3000.
 
-## Learn More
+## Development Notes
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Make sure the required environment variables for Supabase are configured before running the system. The application requires a valid Supabase connection to handle user accounts, attendance records, leave requests, and report data.
