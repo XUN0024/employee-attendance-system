@@ -30,6 +30,14 @@ export async function loginEmployee(credentials: LoginCredentials): Promise<Auth
             };
         }
 
+        // Check if account is active
+        if (data.employee_status === 'inactive') {
+            return {
+                success: false,
+                error: 'Account is deactivated. Please contact your administrator.',
+            };
+        }
+
         // Compare hashed password
         const isPasswordValid = await bcrypt.compare(credentials.password, data.employee_password);
         

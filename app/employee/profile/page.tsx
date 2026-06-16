@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { User, Mail, Shield, Building2, Calendar, Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 import type { Employee } from '@/lib/types';
 
 export default function EmployeeProfilePage() {
@@ -17,23 +16,17 @@ export default function EmployeeProfilePage() {
     const loadEmployeeProfile = async () => {
         setIsLoading(true);
         try {
-            const storedEmployee = localStorage.getItem('employee');
-            if (storedEmployee) {
-                const emp = JSON.parse(storedEmployee);
-                setEmployee(emp);
+            // Fetch employee data from API
+            const response = await fetch('/api/employee/profile');
+            const result = await response.json();
 
-                // Fetch department info
-                if (emp.department_id) {
-                    const { data: dept } = await supabase
-                        .from('departments')
-                        .select('department_name')
-                        .eq('department_id', emp.department_id)
-                        .single();
-
-                    if (dept) {
-                        setDepartmentName(dept.department_name);
-                    }
+            if (result.success && result.employee) {
+                setEmployee(result.employee);
+                if (result.employee.department_name) {
+                    setDepartmentName(result.employee.department_name);
                 }
+            } else {
+                console.error('Failed to load profile:', result.error);
             }
         } catch (err) {
             console.error('Error loading profile:', err);
@@ -143,11 +136,13 @@ export default function EmployeeProfilePage() {
                                 Registration Date
                             </label>
                             <div className="px-4 py-3 bg-slate-50 border border-zinc-200 rounded-lg text-slate-900">
-                                {new Date(employee.employee_date_register).toLocaleDateString('en-US', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                })}
+                                {employee.employee_date_register
+                                    ? new Date(employee.employee_date_register).toLocaleDateString('en-US', {
+                                          year: 'numeric',
+                                          month: 'long',
+                                          day: 'numeric',
+                                      })
+                                    : 'Not available'}
                             </div>
                         </div>
                     </div>

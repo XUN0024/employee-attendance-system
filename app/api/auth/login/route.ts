@@ -30,11 +30,12 @@ export async function POST(request: NextRequest) {
         const response = NextResponse.json({
             success: true,
             employee: {
-                employeeId: result.employee.employee_id,
-                fullName: result.employee.employee_name,
-                email: result.employee.employee_email,
+                employee_id: result.employee.employee_id,
+                employee_name: result.employee.employee_name,
+                employee_email: result.employee.employee_email,
                 role: result.employee.role,
-                departmentId: result.employee.department_id,
+                department_id: result.employee.department_id,
+                employee_date_register: result.employee.employee_date_register,
             },
         });
 

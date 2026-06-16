@@ -8,7 +8,7 @@ const SECRET_KEY = new TextEncoder().encode(
 
 const SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 hours
 
-export interface SessionPayload {
+export interface SessionPayload extends Record<string, any> {
     employeeId: string;
     role: 'employee' | 'admin';
     email: string;
