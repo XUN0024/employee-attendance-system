@@ -116,3 +116,41 @@ VALUES (
 -- 将该员工添加到管理员表
 INSERT INTO admins (employee_id) 
 VALUES ('ADMIN001');
+
+
+-- ==========================================
+-- 🔧 OPTIONAL: Fix for existing databases
+-- ==========================================
+-- If you already have a leave_requests table without proper defaults,
+-- run this section separately to add the default UUID generator
+
+-- Add default UUID generator to leave_id if missing
+DO $$ 
+BEGIN
+    -- Check if leave_id column exists and needs a default
+    IF EXISTS (
+        SELECT 1 
+        FROM information_schema.columns 
+        WHERE table_name = 'leave_requests' 
+        AND column_name = 'leave_id'
+        AND column_default IS NULL
+    ) THEN
+        ALTER TABLE leave_requests 
+        ALTER COLUMN leave_id SET DEFAULT gen_random_uuid();
+        
+        RAISE NOTICE 'Added default UUID generator to leave_id column';
+    ELSE
+        RAISE NOTICE 'leave_id already has a default value or table does not exist';
+    END IF;
+END $$;
+
+-- Verify the table structure
+-- Uncomment to check:
+-- SELECT 
+--     column_name,
+--     column_default,
+--     is_nullable,
+--     data_type
+-- FROM information_schema.columns
+-- WHERE table_name = 'leave_requests'
+-- ORDER BY ordinal_position;
