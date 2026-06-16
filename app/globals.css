@@ -1,1 +1,40 @@
 @import "tailwindcss";
+
+/* FEIJIP Brand Colors & Custom Styles */
+:root {
+  --feijip-blue: #0057FF;
+  --feijip-blue-dark: #0046CC;
+  --feijip-blue-light: #EFF6FF;
+  --feijip-blue-border: #BFDBFE;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Smooth transitions for interactive elements */
+button, a, input, select, textarea {
+  transition: all 0.15s ease;
+}
+
+/* Focus ring improvements */
+*:focus-visible {
+  outline: 2px solid var(--feijip-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

@@ -98,16 +98,16 @@ export default function ChangePasswordPage() {
     const passwordStrength = getPasswordStrength(newPassword);
 
     return (
-        <div className="min-h-screen bg-zinc-50 p-8">
+        <div className="min-h-screen bg-slate-50 p-6 md:p-8">
             <div className="max-w-2xl mx-auto space-y-6">
                 <div>
-                    <h1 className="text-3xl font-semibold text-slate-900">Change Password</h1>
+                    <h1 className="text-3xl font-bold text-slate-900">Change Password</h1>
                     <p className="text-sm text-slate-500 mt-1">Update your account password</p>
                 </div>
 
                 {message && (
                     <div
-                        className={`p-4 rounded-lg border flex items-start gap-3 ${
+                        className={`p-4 rounded-xl border flex items-start gap-3 ${
                             message.type === 'success'
                                 ? 'bg-emerald-50 border-emerald-200'
                                 : 'bg-red-50 border-red-200'
@@ -119,7 +119,7 @@ export default function ChangePasswordPage() {
                             <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
                         )}
                         <p
-                            className={`text-sm font-medium ${
+                            className={`text-sm font-semibold ${
                                 message.type === 'success' ? 'text-emerald-700' : 'text-red-700'
                             }`}
                         >
@@ -128,11 +128,11 @@ export default function ChangePasswordPage() {
                     </div>
                 )}
 
-                <div className="bg-white rounded-lg border border-zinc-200 p-8">
+                <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Current Password */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-2">
+                            <label className="block text-sm font-semibold text-slate-700 mb-2">
                                 <Lock className="inline h-4 w-4 mr-1" />
                                 Current Password *
                             </label>
@@ -142,28 +142,28 @@ export default function ChangePasswordPage() {
                                     value={currentPassword}
                                     onChange={(e) => setCurrentPassword(e.target.value)}
                                     placeholder="Enter your current password"
-                                    className="w-full px-4 py-2.5 pr-12 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                    className="w-full px-4 py-3 pr-12 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:bg-slate-50"
                                     disabled={isLoading}
                                     required
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowCurrent(!showCurrent)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                                     tabIndex={-1}
                                 >
                                     {showCurrent ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                 </button>
                             </div>
-                            <p className="text-xs text-slate-500 mt-1">
+                            <p className="text-xs text-slate-500 mt-2">
                                 Enter your current password to verify your identity
                             </p>
                         </div>
 
-                        <div className="border-t border-zinc-200 pt-6">
+                        <div className="border-t border-slate-200 pt-6">
                             {/* New Password */}
                             <div className="mb-6">
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
                                     <Lock className="inline h-4 w-4 mr-1" />
                                     New Password *
                                 </label>
@@ -173,14 +173,14 @@ export default function ChangePasswordPage() {
                                         value={newPassword}
                                         onChange={(e) => setNewPassword(e.target.value)}
                                         placeholder="Enter your new password"
-                                        className="w-full px-4 py-2.5 pr-12 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                        className="w-full px-4 py-3 pr-12 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:bg-slate-50"
                                         disabled={isLoading}
                                         required
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowNew(!showNew)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                                         tabIndex={-1}
                                     >
                                         {showNew ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -189,10 +189,10 @@ export default function ChangePasswordPage() {
                                 
                                 {/* Password Strength Meter */}
                                 {newPassword && (
-                                    <div className="mt-2">
-                                        <div className="flex items-center justify-between mb-1">
+                                    <div className="mt-3">
+                                        <div className="flex items-center justify-between mb-2">
                                             <span className="text-xs text-slate-500">Password strength:</span>
-                                            <span className={`text-xs font-medium ${
+                                            <span className={`text-xs font-bold ${
                                                 passwordStrength.strength === 'Weak' ? 'text-red-600' :
                                                 passwordStrength.strength === 'Fair' ? 'text-orange-600' :
                                                 passwordStrength.strength === 'Good' ? 'text-yellow-600' :
@@ -218,7 +218,7 @@ export default function ChangePasswordPage() {
 
                             {/* Confirm New Password */}
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
                                     <Lock className="inline h-4 w-4 mr-1" />
                                     Confirm New Password *
                                 </label>
@@ -228,14 +228,14 @@ export default function ChangePasswordPage() {
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         placeholder="Re-enter your new password"
-                                        className="w-full px-4 py-2.5 pr-12 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                                        className="w-full px-4 py-3 pr-12 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:bg-slate-50"
                                         disabled={isLoading}
                                         required
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowConfirm(!showConfirm)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                                         tabIndex={-1}
                                     >
                                         {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -244,7 +244,7 @@ export default function ChangePasswordPage() {
                                 
                                 {/* Match Indicator */}
                                 {confirmPassword && (
-                                    <p className={`text-xs mt-1 ${
+                                    <p className={`text-xs mt-2 font-semibold ${
                                         newPassword === confirmPassword ? 'text-green-600' : 'text-red-600'
                                     }`}>
                                         {newPassword === confirmPassword ? '✓ Passwords match' : '✗ Passwords do not match'}
@@ -254,11 +254,11 @@ export default function ChangePasswordPage() {
                         </div>
 
                         {/* Submit Button */}
-                        <div className="flex gap-3 pt-4 border-t border-zinc-200">
+                        <div className="flex gap-3 pt-4 border-t border-slate-200">
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isLoading ? (
                                     <>
@@ -277,11 +277,11 @@ export default function ChangePasswordPage() {
                 </div>
 
                 {/* Password Requirements */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
                     <div className="flex items-start gap-3">
                         <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                         <div className="text-sm text-blue-800">
-                            <p className="font-medium mb-2">Password Requirements</p>
+                            <p className="font-bold mb-2">Password Requirements</p>
                             <ul className="list-disc list-inside space-y-1 text-blue-700">
                                 <li>Minimum 6 characters required</li>
                                 <li>Must be different from your current password</li>
@@ -293,11 +293,11 @@ export default function ChangePasswordPage() {
                 </div>
 
                 {/* Security Notice */}
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                     <div className="flex items-start gap-3">
                         <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
                         <div className="text-sm text-amber-800">
-                            <p className="font-medium mb-1">Security Notice</p>
+                            <p className="font-bold mb-1">Security Notice</p>
                             <p className="text-amber-700">
                                 After changing your password, you will need to use the new password for all future logins.
                                 Make sure to remember or securely store your new password.

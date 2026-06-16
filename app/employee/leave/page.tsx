@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Calendar, FileText, Loader2, CheckCircle2, XCircle, Clock, Plus } from 'lucide-react';
 import { submitLeaveRequest, getEmployeeLeaveRequests } from '@/lib/leave';
 import type { Employee, LeaveRequest } from '@/lib/types';
+import { ListSkeleton } from '@/components/ui/skeleton';
 
 export default function LeavePage() {
     const [employee, setEmployee] = useState<Employee | null>(null);
@@ -114,32 +115,28 @@ export default function LeavePage() {
     };
 
     if (isLoading) {
-        return (
-            <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-            </div>
-        );
+        return <ListSkeleton items={4} />;
     }
 
     if (!employee) {
         return (
-            <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
                 <p className="text-slate-600">Please log in to access leave requests</p>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-zinc-50 p-8">
+        <div className="min-h-screen bg-slate-50 p-6 md:p-8">
             <div className="max-w-6xl mx-auto space-y-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-semibold text-slate-900">Leave Requests</h1>
+                        <h1 className="text-3xl font-bold text-slate-900">Leave Requests</h1>
                         <p className="text-sm text-slate-500 mt-1">Submit and track your leave applications</p>
                     </div>
                     <button
                         onClick={() => setShowForm(!showForm)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                        className="flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
                     >
                         <Plus className="h-5 w-5" />
                         New Request
@@ -148,7 +145,7 @@ export default function LeavePage() {
 
                 {message && (
                     <div
-                        className={`p-4 rounded-lg border flex items-start gap-3 ${
+                        className={`p-4 rounded-xl border flex items-start gap-3 ${
                             message.type === 'success'
                                 ? 'bg-emerald-50 border-emerald-200'
                                 : 'bg-red-50 border-red-200'
@@ -160,7 +157,7 @@ export default function LeavePage() {
                             <XCircle className="h-5 w-5 text-red-600 mt-0.5" />
                         )}
                         <p
-                            className={`text-sm font-medium ${
+                            className={`text-sm font-semibold ${
                                 message.type === 'success' ? 'text-emerald-700' : 'text-red-700'
                             }`}
                         >
@@ -170,44 +167,44 @@ export default function LeavePage() {
                 )}
 
                 {showForm && (
-                    <div className="bg-white rounded-lg border border-zinc-200 p-6">
-                        <h2 className="text-lg font-semibold text-slate-900 mb-4">Submit Leave Request</h2>
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <h2 className="text-lg font-bold text-slate-900 mb-6">Submit Leave Request</h2>
+                        <form onSubmit={handleSubmit} className="space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
                                         Start Date
                                     </label>
                                     <input
                                         type="date"
                                         value={startDate}
                                         onChange={(e) => setStartDate(e.target.value)}
-                                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         required
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                                    <label className="block text-sm font-semibold text-slate-700 mb-2">
                                         End Date
                                     </label>
                                     <input
                                         type="date"
                                         value={endDate}
                                         onChange={(e) => setEndDate(e.target.value)}
-                                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         required
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
                                     Leave Type
                                 </label>
                                 <select
                                     value={leaveType}
                                     onChange={(e) => setLeaveType(e.target.value as any)}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     required
                                 >
                                     <option value="Annual">Annual Leave</option>
@@ -218,23 +215,23 @@ export default function LeavePage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">
+                                <label className="block text-sm font-semibold text-slate-700 mb-2">
                                     Reason (Optional)
                                 </label>
                                 <textarea
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
                                     rows={3}
-                                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     placeholder="Brief explanation for your leave request..."
                                 />
                             </div>
 
-                            <div className="flex gap-3">
+                            <div className="flex gap-3 pt-2">
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {isSubmitting ? (
                                         <>
@@ -248,7 +245,7 @@ export default function LeavePage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowForm(false)}
-                                    className="px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                                    className="px-6 py-3 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-all font-semibold"
                                 >
                                     Cancel
                                 </button>
@@ -257,15 +254,15 @@ export default function LeavePage() {
                     </div>
                 )}
 
-                <div className="bg-white rounded-lg border border-zinc-200">
-                    <div className="p-6 border-b border-zinc-200">
-                        <h2 className="text-lg font-semibold text-slate-900">My Leave Requests</h2>
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
+                    <div className="p-6 border-b border-slate-200">
+                        <h2 className="text-lg font-bold text-slate-900">My Leave Requests</h2>
                     </div>
-                    <div className="divide-y divide-zinc-200">
+                    <div className="divide-y divide-slate-200">
                         {leaveRequests.length === 0 ? (
                             <div className="p-12 text-center">
                                 <FileText className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-                                <p className="text-slate-500">No leave requests yet</p>
+                                <p className="text-slate-500 font-medium">No leave requests yet</p>
                                 <p className="text-sm text-slate-400 mt-1">
                                     Click "New Request" to submit your first leave application
                                 </p>
@@ -276,11 +273,11 @@ export default function LeavePage() {
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-2">
-                                                <h3 className="font-semibold text-slate-900">
+                                                <h3 className="font-bold text-slate-900">
                                                     {request.leave_type} Leave
                                                 </h3>
                                                 <span
-                                                    className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border ${getStatusBadge(
+                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border ${getStatusBadge(
                                                         request.leave_status
                                                     )}`}
                                                 >
@@ -295,7 +292,7 @@ export default function LeavePage() {
                                                     {new Date(request.end_date).toLocaleDateString()}
                                                 </div>
                                                 <span className="text-slate-400">•</span>
-                                                <span>
+                                                <span className="font-medium">
                                                     {calculateDays(request.start_date, request.end_date)} day(s)
                                                 </span>
                                             </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Calendar, CheckCircle, XCircle, Loader2, FileText, User, Clock } from 'lucide-react';
 import { getPendingLeaveRequests, getAllLeaveRequests, approveLeaveRequest, rejectLeaveRequest } from '@/lib/leave';
 import type { LeaveRequest } from '@/lib/types';
+import { LeaveCardSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 interface LeaveRequestWithEmployee extends LeaveRequest {
     employees?: {
@@ -124,8 +125,25 @@ export default function LeaveApprovalsPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <div className="min-h-screen bg-slate-50 p-6 md:p-8">
+                <div className="max-w-7xl mx-auto space-y-6">
+                    <div>
+                        <Skeleton className="h-9 w-64 mb-2" />
+                        <Skeleton className="h-4 w-96" />
+                    </div>
+                    
+                    <div className="flex gap-2 border-b border-slate-200">
+                        <Skeleton className="h-10 w-32" />
+                        <Skeleton className="h-10 w-32" />
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                        <LeaveCardSkeleton />
+                        <LeaveCardSkeleton />
+                        <LeaveCardSkeleton />
+                        <LeaveCardSkeleton />
+                    </div>
+                </div>
             </div>
         );
     }

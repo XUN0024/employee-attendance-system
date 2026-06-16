@@ -56,24 +56,27 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
-                <div className="bg-white rounded-lg shadow-lg p-8">
+                <div className="bg-white rounded-2xl shadow-xl border border-blue-100 p-8">
                     <div className="text-center mb-8">
-                        <h1 className="text-2xl font-bold text-slate-800 mb-2">
+                        <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4 shadow-lg">
+                            <span className="text-2xl font-bold text-white">F</span>
+                        </div>
+                        <h1 className="text-2xl font-bold text-slate-900 mb-2">
                             FEIJIP Attendance Portal
                         </h1>
-                        <p className="text-sm text-slate-500">Sign in to continue</p>
+                        <p className="text-sm text-slate-500">Sign in to your account</p>
                     </div>
 
-                    <div className="flex bg-slate-100 rounded-lg p-1 mb-6">
+                    <div className="flex bg-blue-50 rounded-xl p-1.5 mb-6 border border-blue-100">
                         <button
                             type="button"
                             onClick={() => setRole('employee')}
                             disabled={isLoading}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md text-sm font-medium transition-all ${role === 'employee'
-                                    ? 'bg-white text-slate-800 shadow-sm'
-                                    : 'text-slate-600 hover:text-slate-800'
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all ${role === 'employee'
+                                    ? 'bg-white text-blue-600 shadow-md'
+                                    : 'text-slate-600 hover:text-slate-900'
                                 } disabled:opacity-50`}
                         >
                             <User size={18} />
@@ -83,9 +86,9 @@ export default function LoginPage() {
                             type="button"
                             onClick={() => setRole('admin')}
                             disabled={isLoading}
-                            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md text-sm font-medium transition-all ${role === 'admin'
-                                    ? 'bg-white text-slate-800 shadow-sm'
-                                    : 'text-slate-600 hover:text-slate-800'
+                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all ${role === 'admin'
+                                    ? 'bg-white text-blue-600 shadow-md'
+                                    : 'text-slate-600 hover:text-slate-900'
                                 } disabled:opacity-50`}
                         >
                             <Shield size={18} />
@@ -94,8 +97,8 @@ export default function LoginPage() {
                     </div>
 
                     {error && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                            <p className="text-sm text-red-600">{error}</p>
+                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                            <p className="text-sm text-red-700 font-medium">{error}</p>
                         </div>
                     )}
 
@@ -117,7 +120,7 @@ export default function LoginPage() {
                                     value={employeeId}
                                     onChange={(e) => setEmployeeId(e.target.value)}
                                     placeholder="Enter your employee ID"
-                                    className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50"
                                     disabled={isLoading}
                                     required
                                 />
@@ -141,7 +144,7 @@ export default function LoginPage() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Enter your password"
-                                    className="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50"
                                     disabled={isLoading}
                                     required
                                 />
@@ -151,7 +154,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2"
                         >
                             {isLoading ? (
                                 <>

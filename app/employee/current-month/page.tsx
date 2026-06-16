@@ -5,6 +5,7 @@ import { Calendar, Clock, TrendingUp, Loader2, ChevronLeft, ChevronRight, CheckC
 import { getMonthlyAttendance, getAttendanceStats } from '@/lib/attendance';
 import type { Employee, Attendance } from '@/lib/types';
 import type { AttendanceStats } from '@/lib/attendance';
+import { TableSkeleton, StatCardSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 export default function CurrentMonthPage() {
     const [employee, setEmployee] = useState<Employee | null>(null);
@@ -151,8 +152,32 @@ export default function CurrentMonthPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <div className="min-h-screen bg-slate-50 p-6 md:p-8">
+                <div className="max-w-7xl mx-auto space-y-6">
+                    <div>
+                        <Skeleton className="h-9 w-64 mb-2" />
+                        <Skeleton className="h-4 w-48" />
+                    </div>
+                    
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <div className="flex items-center justify-between mb-6">
+                            <Skeleton className="h-10 w-32 rounded-xl" />
+                            <Skeleton className="h-8 w-48" />
+                            <Skeleton className="h-10 w-32 rounded-xl" />
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
+                            {[...Array(6)].map((_, i) => (
+                                <div key={i} className="bg-slate-50 rounded-xl p-4 border-l-4 border-slate-300">
+                                    <Skeleton className="h-4 w-20 mb-2" />
+                                    <Skeleton className="h-8 w-12" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    <TableSkeleton rows={10} />
+                </div>
             </div>
         );
     }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Users, Clock, FileText, TrendingUp, AlertCircle, CheckCircle2, XCircle, Calendar } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import { AdminStatsSkeleton, ListSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 interface DashboardStats {
     totalEmployees: number;
@@ -134,6 +135,33 @@ export default function AdminDashboard() {
         month: 'long',
         day: 'numeric',
     });
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-slate-50 p-6 md:p-8">
+                <div className="max-w-7xl mx-auto space-y-6">
+                    <div>
+                        <Skeleton className="h-9 w-64 mb-2" />
+                        <Skeleton className="h-4 w-48" />
+                    </div>
+                    
+                    <AdminStatsSkeleton />
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <ListSkeleton items={5} />
+                        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                            <Skeleton className="h-6 w-32 mb-6" />
+                            <div className="space-y-3">
+                                {[...Array(4)].map((_, i) => (
+                                    <Skeleton key={i} className="h-20 w-full rounded-xl" />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-zinc-50 p-8">

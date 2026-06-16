@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Users, Search, Loader2, Mail, Building2, Shield, User, Calendar, AlertCircle, Power, CheckCircle2, Edit, X, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { AdminEmployeeDetails } from '@/lib/types';
+import { AdminStatsSkeleton, TableSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 export const dynamic = 'force-dynamic';
 
@@ -241,8 +242,26 @@ export default function AllEmployeesPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-zinc-50 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <div className="min-h-screen bg-slate-50 p-6 md:p-8">
+                <div className="max-w-7xl mx-auto space-y-6">
+                    <div>
+                        <Skeleton className="h-9 w-64 mb-2" />
+                        <Skeleton className="h-4 w-96" />
+                    </div>
+                    
+                    <AdminStatsSkeleton />
+                    
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <div className="flex flex-col md:flex-row gap-4 mb-4">
+                            <Skeleton className="flex-1 h-12 rounded-xl" />
+                            <Skeleton className="md:w-48 h-12 rounded-xl" />
+                            <Skeleton className="md:w-48 h-12 rounded-xl" />
+                        </div>
+                        <Skeleton className="h-4 w-64" />
+                    </div>
+                    
+                    <TableSkeleton rows={8} />
+                </div>
             </div>
         );
     }

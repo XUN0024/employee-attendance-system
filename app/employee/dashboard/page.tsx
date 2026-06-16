@@ -1,10 +1,12 @@
 'use client';
 
-import { Calendar, Clock, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, ArrowRight, User, TrendingUp, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { getTodayAttendance } from '@/lib/attendance';
 import type { Employee } from '@/lib/types';
+import { DashboardSkeleton } from '@/components/ui/skeleton';
+import { PageHeader, StatCard } from '@/components/ui/page-header';
 
 const mockData = {
     employee: {
@@ -80,108 +82,91 @@ export default function EmployeeDashboard() {
         day: 'numeric',
     });
 
+    if (isLoading) {
+        return <DashboardSkeleton />;
+    }
+
     return (
-        <div className="min-h-screen bg-zinc-50 p-8">
-            <div className="max-w-7xl mx-auto space-y-8">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-semibold text-slate-900">
-                            Welcome back, {employee?.employee_name || mockData.employee.name}
-                        </h1>
-                        <p className="text-sm text-slate-500 mt-1">{currentDate}</p>
-                    </div>
-                </div>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-slate-50 to-blue-50 p-6 md:p-8">
+            <div className="max-w-7xl mx-auto space-y-6">
+                <PageHeader
+                    title={`Welcome back, ${employee?.employee_name || mockData.employee.name}!`}
+                    subtitle={currentDate}
+                    icon={<User className="h-7 w-7 text-white" />}
+                    gradient={true}
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-white rounded-lg border border-zinc-200 p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div
-                                className={`p-2 rounded-lg ${todayStatus === 'Checked In' ? 'bg-emerald-50' : 'bg-slate-50'}`}
-                            >
-                                <CheckCircle2
-                                    className={`h-5 w-5 ${todayStatus === 'Checked In' ? 'text-emerald-600' : 'text-slate-400'}`}
-                                />
-                            </div>
-                            <h3 className="text-sm font-medium text-slate-600">Today's Status</h3>
-                        </div>
-                        <p className="text-2xl font-semibold text-slate-900">{todayStatus}</p>
-                        {checkInTime && (
-                            <>
-                                <p className="text-sm text-slate-500 mt-1">at {checkInTime}</p>
-                                {attendanceStatus && (
-                                    <span
-                                        className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium mt-2 ${attendanceStatus === 'Present'
-                                            ? 'bg-emerald-50 text-emerald-700'
-                                            : 'bg-amber-50 text-amber-700'
-                                            }`}
-                                    >
-                                        {attendanceStatus}
-                                    </span>
-                                )}
-                            </>
-                        )}
-                    </div>
+                    <StatCard
+                        icon={<CheckCircle2 className="h-6 w-6" />}
+                        label="Today's Status"
+                        value={todayStatus}
+                        subtitle={checkInTime ? `at ${checkInTime}` : 'Not checked in yet'}
+                        color={todayStatus === 'Checked In' ? 'emerald' : 'slate'}
+                    />
 
-                    <div className="bg-white rounded-lg border border-zinc-200 p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-blue-50 rounded-lg">
-                                <Calendar className="h-5 w-5 text-blue-600" />
-                            </div>
-                            <h3 className="text-sm font-medium text-slate-600">Days Present</h3>
-                        </div>
-                        <p className="text-2xl font-semibold text-slate-900">{mockData.employee.totalPresent}</p>
-                        <p className="text-sm text-slate-500 mt-1">This month</p>
-                    </div>
+                    <StatCard
+                        icon={<Calendar className="h-6 w-6" />}
+                        label="Days Present"
+                        value={mockData.employee.totalPresent}
+                        subtitle="This month"
+                        color="blue"
+                    />
 
-                    <div className="bg-white rounded-lg border border-zinc-200 p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-amber-50 rounded-lg">
-                                <Clock className="h-5 w-5 text-amber-600" />
-                            </div>
-                            <h3 className="text-sm font-medium text-slate-600">Late Arrivals</h3>
-                        </div>
-                        <p className="text-2xl font-semibold text-slate-900">{mockData.employee.lateArrivals}</p>
-                        <p className="text-sm text-slate-500 mt-1">This month</p>
-                    </div>
+                    <StatCard
+                        icon={<Clock className="h-6 w-6" />}
+                        label="Late Arrivals"
+                        value={mockData.employee.lateArrivals}
+                        subtitle="This month"
+                        color="amber"
+                    />
                 </div>
 
-                <div className="bg-white rounded-lg border border-zinc-200 p-6">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-6">Recent Attendance Activity</h2>
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
+                    {/* Header with blue gradient */}
+                    <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-6">
+                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                            <TrendingUp className="h-6 w-6" />
+                            Recent Attendance Activity
+                        </h2>
+                        <p className="text-blue-100 text-sm mt-1">Your attendance records from the past week</p>
+                    </div>
+                    
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className="border-b border-zinc-200">
-                                    <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                <tr className="bg-blue-50 border-b-2 border-blue-100">
+                                    <th className="text-left py-4 px-6 text-xs font-bold text-blue-900 uppercase tracking-wider">
                                         Date
                                     </th>
-                                    <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                    <th className="text-left py-4 px-6 text-xs font-bold text-blue-900 uppercase tracking-wider">
                                         Day
                                     </th>
-                                    <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                    <th className="text-left py-4 px-6 text-xs font-bold text-blue-900 uppercase tracking-wider">
                                         Check In
                                     </th>
-                                    <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                    <th className="text-left py-4 px-6 text-xs font-bold text-blue-900 uppercase tracking-wider">
                                         Check Out
                                     </th>
-                                    <th className="text-left py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                    <th className="text-left py-4 px-6 text-xs font-bold text-blue-900 uppercase tracking-wider">
                                         Status
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-zinc-100">
+                            <tbody className="divide-y divide-slate-100">
                                 {mockData.recentActivity.map((record, index) => (
-                                    <tr key={index} className="hover:bg-zinc-50 transition-colors">
-                                        <td className="py-4 px-4 text-sm text-slate-900">{record.date}</td>
-                                        <td className="py-4 px-4 text-sm text-slate-600">{record.day}</td>
-                                        <td className="py-4 px-4 text-sm text-slate-900">{record.checkIn}</td>
-                                        <td className="py-4 px-4 text-sm text-slate-900">{record.checkOut}</td>
-                                        <td className="py-4 px-4">
+                                    <tr key={index} className="hover:bg-blue-50/50 transition-colors duration-150">
+                                        <td className="py-4 px-6 text-sm font-semibold text-slate-900">{record.date}</td>
+                                        <td className="py-4 px-6 text-sm text-slate-600">{record.day}</td>
+                                        <td className="py-4 px-6 text-sm font-medium text-slate-900">{record.checkIn}</td>
+                                        <td className="py-4 px-6 text-sm font-medium text-slate-900">{record.checkOut}</td>
+                                        <td className="py-4 px-6">
                                             <span
-                                                className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${record.status === 'On Time'
-                                                    ? 'bg-emerald-50 text-emerald-700'
+                                                className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${record.status === 'On Time'
+                                                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
                                                     : record.status === 'Late'
-                                                        ? 'bg-amber-50 text-amber-700'
-                                                        : 'bg-slate-50 text-slate-600'
+                                                        ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                                                        : 'bg-slate-100 text-slate-600 border border-slate-200'
                                                     }`}
                                             >
                                                 {record.status}
@@ -194,11 +179,23 @@ export default function EmployeeDashboard() {
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100 p-6">
-                    <div className="flex items-center justify-between">
+                {/* Enhanced CTA Card */}
+                <div className="relative bg-gradient-to-br from-blue-600 via-blue-500 to-blue-600 rounded-2xl p-8 shadow-2xl overflow-hidden">
+                    {/* Decorative elements */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl" />
+                    
+                    <div className="relative z-10 flex items-center justify-between">
                         <div>
-                            <h3 className="text-lg font-semibold text-slate-900 mb-1">Mark Today's Attendance</h3>
-                            <p className="text-sm text-slate-600">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                                    <Zap className="h-6 w-6 text-white" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-white">
+                                    Mark Today's Attendance
+                                </h3>
+                            </div>
+                            <p className="text-blue-100 text-base">
                                 {todayStatus === 'Checked In'
                                     ? "Don't forget to clock out before leaving"
                                     : "Don't forget to log your check-in time"}
@@ -206,10 +203,10 @@ export default function EmployeeDashboard() {
                         </div>
                         <Link
                             href="/employee/mark"
-                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                            className="flex items-center gap-3 bg-white hover:bg-blue-50 text-blue-600 px-8 py-4 rounded-xl text-base font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95"
                         >
                             Mark Attendance
-                            <ArrowRight className="h-4 w-4" />
+                            <ArrowRight className="h-5 w-5" />
                         </Link>
                     </div>
                 </div>
