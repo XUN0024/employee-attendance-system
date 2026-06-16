@@ -12,6 +12,7 @@ export interface Employee {
     employee_password: string;
     role: 'employee' | 'admin';
     department_id: string | null;
+    employee_status: 'active' | 'inactive';
     employee_date_register: string;
 }
 
