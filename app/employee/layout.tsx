@@ -10,7 +10,7 @@ const menuItems = [
     { href: '/employee/profile', label: 'My Profile', icon: User },
     { href: '/employee/mark', label: 'Mark Attendance', icon: CheckSquare },
     { href: '/employee/leave', label: 'Leave Requests', icon: FileText },
-    { href: '/employee/current-month', label: 'Current Month Attendance', icon: CalendarDays },
+    { href: '/employee/current-month', label: 'Attendance', icon: CalendarDays },
     { href: '/employee/change-password', label: 'Change Password', icon: Key },
 ];
 

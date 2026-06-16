@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Clock, LogIn, LogOut, Loader2, CheckCircle2, AlertCircle, AlertTriangle } from 'lucide-react';
+import { Clock, LogIn, LogOut, Loader2, CheckCircle2, AlertCircle, AlertTriangle, Briefcase } from 'lucide-react';
 import { clockIn, clockOut, getTodayAttendance, isClockInAllowed } from '@/lib/attendance';
+import { supabase } from '@/lib/supabase';
 import type { Employee } from '@/lib/types';
 
 export default function MarkAttendancePage() {
@@ -18,6 +19,8 @@ export default function MarkAttendancePage() {
     const [currentTime, setCurrentTime] = useState(new Date());
     const [clockInAllowed, setClockInAllowed] = useState(true);
     const [clockInRestrictionReason, setClockInRestrictionReason] = useState<string>('');
+    const [hasApprovedLeave, setHasApprovedLeave] = useState(false);
+    const [leaveType, setLeaveType] = useState<string>('');
 
     useEffect(() => {
         // Load employee from localStorage
@@ -49,6 +52,22 @@ export default function MarkAttendancePage() {
     const loadTodayAttendance = async (employeeId: string) => {
         setIsLoading(true);
         try {
+            // Check for approved leave today
+            const today = new Date().toISOString().split('T')[0];
+            const { data: leaveData, error: leaveError } = await supabase
+                .from('leave_requests')
+                .select('leave_type')
+                .eq('employee_id', employeeId)
+                .eq('leave_status', 'Approved')
+                .lte('start_date', today)
+                .gte('end_date', today)
+                .single();
+
+            if (!leaveError && leaveData) {
+                setHasApprovedLeave(true);
+                setLeaveType(leaveData.leave_type);
+            }
+
             const status = await getTodayAttendance(employeeId);
             setHasCheckedIn(status.hasCheckedIn);
             setHasCheckedOut(status.hasCheckedOut);
@@ -247,12 +266,22 @@ export default function MarkAttendancePage() {
                     </div>
                 )}
 
-                {!clockInAllowed && !hasCheckedIn && (
+                {!clockInAllowed && !hasCheckedIn && !hasApprovedLeave && (
                     <div className="p-4 rounded-lg border bg-red-50 border-red-200 flex items-start gap-3">
                         <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
                         <div>
                             <p className="text-sm font-medium text-red-900">Clock In Not Available</p>
                             <p className="text-sm text-red-700 mt-1">{clockInRestrictionReason}</p>
+                        </div>
+                    </div>
+                )}
+
+                {hasApprovedLeave && (
+                    <div className="p-4 rounded-lg border bg-blue-50 border-blue-200 flex items-start gap-3">
+                        <Briefcase className="h-5 w-5 text-blue-600 mt-0.5" />
+                        <div>
+                            <p className="text-sm font-medium text-blue-900">You are on {leaveType} Leave Today</p>
+                            <p className="text-sm text-blue-700 mt-1">Clock in and clock out are disabled because you have an approved leave for today.</p>
                         </div>
                     </div>
                 )}
@@ -295,7 +324,7 @@ export default function MarkAttendancePage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <button
                             onClick={handleClockIn}
-                            disabled={isProcessing || hasCheckedIn || !clockInAllowed}
+                            disabled={isProcessing || hasCheckedIn || !clockInAllowed || hasApprovedLeave}
                             className="flex items-center justify-center gap-3 p-6 rounded-lg border-2 border-emerald-200 bg-emerald-50 hover:bg-emerald-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-emerald-50"
                         >
                             {isProcessing && !hasCheckedIn ? (
@@ -306,14 +335,18 @@ export default function MarkAttendancePage() {
                             <div className="text-left">
                                 <div className="font-semibold text-emerald-900">Clock In</div>
                                 <div className="text-xs text-emerald-700">
-                                    {!clockInAllowed && !hasCheckedIn ? 'Not available now' : 'Mark your arrival'}
+                                    {hasApprovedLeave
+                                        ? 'On leave today'
+                                        : !clockInAllowed && !hasCheckedIn
+                                          ? 'Not available now'
+                                          : 'Mark your arrival'}
                                 </div>
                             </div>
                         </button>
 
                         <button
                             onClick={handleClockOut}
-                            disabled={isProcessing || !hasCheckedIn || hasCheckedOut}
+                            disabled={isProcessing || !hasCheckedIn || hasCheckedOut || hasApprovedLeave}
                             className="flex items-center justify-center gap-3 p-6 rounded-lg border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-50"
                         >
                             {isProcessing && hasCheckedIn && !hasCheckedOut ? (
@@ -323,7 +356,9 @@ export default function MarkAttendancePage() {
                             )}
                             <div className="text-left">
                                 <div className="font-semibold text-blue-900">Clock Out</div>
-                                <div className="text-xs text-blue-700">Mark your departure</div>
+                                <div className="text-xs text-blue-700">
+                                    {hasApprovedLeave ? 'On leave today' : 'Mark your departure'}
+                                </div>
                             </div>
                         </button>
                     </div>

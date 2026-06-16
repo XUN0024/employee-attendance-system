@@ -35,16 +35,16 @@ const CLOCK_IN_END_MINUTE = 0;
 export function isClockInAllowed(currentTime: Date): { allowed: boolean; reason?: string } {
     const hour = currentTime.getHours();
     const minute = currentTime.getMinutes();
-    
+
     // Convert time to minutes for easier comparison
     const currentMinutes = hour * 60 + minute;
     const startMinutes = CLOCK_IN_START_HOUR * 60 + CLOCK_IN_START_MINUTE;
     const endMinutes = CLOCK_IN_END_HOUR * 60 + CLOCK_IN_END_MINUTE;
-    
+
     if (currentMinutes >= startMinutes && currentMinutes <= endMinutes) {
         return { allowed: true };
     }
-    
+
     return {
         allowed: false,
         reason: `Clock in is only allowed between 6:00 AM and 6:00 PM`,
@@ -56,12 +56,12 @@ export function isClockInAllowed(currentTime: Date): { allowed: boolean; reason?
  */
 async function getServerTimestamp(): Promise<Date> {
     const { data, error } = await supabase.rpc('get_server_time');
-    
+
     if (error || !data) {
         // Fallback to current time if RPC fails
         return new Date();
     }
-    
+
     return new Date(data);
 }
 
@@ -71,12 +71,12 @@ async function getServerTimestamp(): Promise<Date> {
 function calculateAttendanceStatus(checkInTime: Date): 'Present' | 'Late' {
     const hour = checkInTime.getHours();
     const minute = checkInTime.getMinutes();
-    
+
     // Late if after 9:00 AM
     if (hour > WORK_START_HOUR || (hour === WORK_START_HOUR && minute > WORK_START_MINUTE)) {
         return 'Late';
     }
-    
+
     return 'Present';
 }
 
@@ -88,7 +88,7 @@ export async function getTodayAttendance(employeeId: string): Promise<TodayAtten
         // Get current date in YYYY-MM-DD format (server-side)
         const { data: serverTime } = await supabase.rpc('get_server_time');
         const currentDate = serverTime ? new Date(serverTime).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
-        
+
         const { data, error } = await supabase
             .from('attendances')
             .select('*')
@@ -129,7 +129,25 @@ export async function clockIn(employeeId: string): Promise<ClockInResponse> {
     try {
         // Get server timestamp first
         const serverTime = await getServerTimestamp();
-        
+
+        // Check if employee has approved leave today
+        const currentDate = serverTime.toISOString().split('T')[0];
+        const { data: leaveData, error: leaveError } = await supabase
+            .from('leave_requests')
+            .select('leave_type')
+            .eq('employee_id', employeeId)
+            .eq('leave_status', 'Approved')
+            .lte('start_date', currentDate)
+            .gte('end_date', currentDate)
+            .maybeSingle();
+
+        if (leaveData) {
+            return {
+                success: false,
+                error: `You have an approved ${leaveData.leave_type} leave today. Clock in is not allowed.`,
+            };
+        }
+
         // Check if clock in is allowed at this time
         const timeCheck = isClockInAllowed(serverTime);
         if (!timeCheck.allowed) {
@@ -138,10 +156,10 @@ export async function clockIn(employeeId: string): Promise<ClockInResponse> {
                 error: timeCheck.reason || 'Clock in is not allowed at this time',
             };
         }
-        
+
         // Check if already clocked in today
         const todayStatus = await getTodayAttendance(employeeId);
-        
+
         if (todayStatus.hasCheckedIn) {
             return {
                 success: false,
@@ -149,8 +167,6 @@ export async function clockIn(employeeId: string): Promise<ClockInResponse> {
             };
         }
 
-        const currentDate = serverTime.toISOString().split('T')[0];
-        
         // Calculate status
         const status = calculateAttendanceStatus(serverTime);
 
@@ -189,9 +205,30 @@ export async function clockIn(employeeId: string): Promise<ClockInResponse> {
  */
 export async function clockOut(employeeId: string): Promise<ClockOutResponse> {
     try {
+        // Get server timestamp
+        const serverTime = await getServerTimestamp();
+        const currentDate = serverTime.toISOString().split('T')[0];
+
+        // Check if employee has approved leave today
+        const { data: leaveData, error: leaveError } = await supabase
+            .from('leave_requests')
+            .select('leave_type')
+            .eq('employee_id', employeeId)
+            .eq('leave_status', 'Approved')
+            .lte('start_date', currentDate)
+            .gte('end_date', currentDate)
+            .maybeSingle();
+
+        if (leaveData) {
+            return {
+                success: false,
+                error: `You have an approved ${leaveData.leave_type} leave today. Clock out is not allowed.`,
+            };
+        }
+
         // Check if clocked in today
         const todayStatus = await getTodayAttendance(employeeId);
-        
+
         if (!todayStatus.hasCheckedIn) {
             return {
                 success: false,
@@ -205,10 +242,6 @@ export async function clockOut(employeeId: string): Promise<ClockOutResponse> {
                 error: 'You have already clocked out today',
             };
         }
-
-        // Get server timestamp
-        const serverTime = await getServerTimestamp();
-        const currentDate = serverTime.toISOString().split('T')[0];
 
         // Update attendance record with check-out time
         const { data, error } = await supabase
@@ -292,6 +325,7 @@ export async function getMonthlyAttendance(employeeId: string, year: number, mon
  * Get attendance statistics for an employee
  */
 export interface AttendanceStats {
+    workDays: number;
     totalDays: number;
     presentDays: number;
     lateDays: number;
@@ -303,28 +337,29 @@ export interface AttendanceStats {
 export async function getAttendanceStats(employeeId: string, year: number, month: number): Promise<AttendanceStats> {
     try {
         const attendance = await getMonthlyAttendance(employeeId, year, month);
-        
+
         const presentDays = attendance.filter((a) => a.attendance_status === 'Present').length;
         const lateDays = attendance.filter((a) => a.attendance_status === 'Late').length;
         const leaveDays = attendance.filter((a) => a.attendance_status === 'Leave').length;
         const totalDays = attendance.length;
-        
+
         // Calculate work days in the month (excluding weekends)
         const startDate = new Date(year, month - 1, 1);
         const endDate = new Date(year, month, 0);
         let workDays = 0;
-        
+
         for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
             const dayOfWeek = d.getDay();
             if (dayOfWeek !== 0 && dayOfWeek !== 6) {
                 workDays++;
             }
         }
-        
+
         const absentDays = workDays - totalDays;
         const attendanceRate = workDays > 0 ? Math.round((totalDays / workDays) * 100) : 0;
-        
+
         return {
+            workDays,
             totalDays,
             presentDays,
             lateDays,
@@ -335,6 +370,7 @@ export async function getAttendanceStats(employeeId: string, year: number, month
     } catch (err) {
         console.error('Error calculating attendance stats:', err);
         return {
+            workDays: 0,
             totalDays: 0,
             presentDays: 0,
             lateDays: 0,

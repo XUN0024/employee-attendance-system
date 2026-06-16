@@ -12,6 +12,7 @@ export default function CurrentMonthPage() {
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const [attendance, setAttendance] = useState<Attendance[]>([]);
     const [stats, setStats] = useState<AttendanceStats>({
+        workDays: 0,
         totalDays: 0,
         presentDays: 0,
         lateDays: 0,
@@ -189,12 +190,17 @@ export default function CurrentMonthPage() {
                             <h2 className="text-xl font-semibold text-slate-900">
                                 {getMonthName(selectedMonth)} {selectedYear}
                             </h2>
+                            {isCurrentMonth() && (
+                                <span className="ml-2 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md font-medium">
+                                    Current Month
+                                </span>
+                            )}
                             {!isCurrentMonth() && (
                                 <button
                                     onClick={goToCurrentMonth}
-                                    className="ml-2 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                                    className="ml-2 px-3 py-1 text-sm border border-blue-300 text-blue-700 rounded-md hover:bg-blue-50 transition-colors"
                                 >
-                                    Current Month
+                                    Go to Current
                                 </button>
                             )}
                         </div>
@@ -209,16 +215,24 @@ export default function CurrentMonthPage() {
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-                        <div className="bg-slate-50 rounded-lg p-4">
+                    <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
+                        <div className="bg-slate-50 rounded-lg p-4 border-l-4 border-slate-400">
                             <div className="flex items-center gap-2 mb-2">
                                 <Calendar className="h-4 w-4 text-slate-600" />
-                                <p className="text-xs text-slate-600 font-medium">Total Days</p>
+                                <p className="text-xs text-slate-600 font-medium">Work Days</p>
                             </div>
-                            <p className="text-2xl font-semibold text-slate-900">{stats.totalDays}</p>
+                            <p className="text-2xl font-semibold text-slate-900">{stats.workDays}</p>
                         </div>
 
-                        <div className="bg-emerald-50 rounded-lg p-4">
+                        <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Calendar className="h-4 w-4 text-blue-600" />
+                                <p className="text-xs text-blue-700 font-medium">Att. Days</p>
+                            </div>
+                            <p className="text-2xl font-semibold text-blue-900">{stats.totalDays}</p>
+                        </div>
+
+                        <div className="bg-emerald-50 rounded-lg p-4 border-l-4 border-emerald-400">
                             <div className="flex items-center gap-2 mb-2">
                                 <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                                 <p className="text-xs text-emerald-700 font-medium">Present</p>
@@ -226,7 +240,7 @@ export default function CurrentMonthPage() {
                             <p className="text-2xl font-semibold text-emerald-900">{stats.presentDays}</p>
                         </div>
 
-                        <div className="bg-amber-50 rounded-lg p-4">
+                        <div className="bg-amber-50 rounded-lg p-4 border-l-4 border-amber-400">
                             <div className="flex items-center gap-2 mb-2">
                                 <AlertCircle className="h-4 w-4 text-amber-600" />
                                 <p className="text-xs text-amber-700 font-medium">Late</p>
@@ -234,18 +248,18 @@ export default function CurrentMonthPage() {
                             <p className="text-2xl font-semibold text-amber-900">{stats.lateDays}</p>
                         </div>
 
-                        <div className="bg-blue-50 rounded-lg p-4">
+                        <div className="bg-sky-50 rounded-lg p-4 border-l-4 border-sky-400">
                             <div className="flex items-center gap-2 mb-2">
-                                <Briefcase className="h-4 w-4 text-blue-600" />
-                                <p className="text-xs text-blue-700 font-medium">Leave</p>
+                                <Briefcase className="h-4 w-4 text-sky-600" />
+                                <p className="text-xs text-sky-700 font-medium">Leave</p>
                             </div>
-                            <p className="text-2xl font-semibold text-blue-900">{stats.leaveDays}</p>
+                            <p className="text-2xl font-semibold text-sky-900">{stats.leaveDays}</p>
                         </div>
 
-                        <div className="bg-purple-50 rounded-lg p-4">
+                        <div className="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-400">
                             <div className="flex items-center gap-2 mb-2">
                                 <TrendingUp className="h-4 w-4 text-purple-600" />
-                                <p className="text-xs text-purple-700 font-medium">Attendance Rate</p>
+                                <p className="text-xs text-purple-700 font-medium">Att. Rate</p>
                             </div>
                             <p className="text-2xl font-semibold text-purple-900">{stats.attendanceRate}%</p>
                         </div>
@@ -317,11 +331,13 @@ export default function CurrentMonthPage() {
                     <div className="flex items-start gap-3">
                         <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                         <div className="text-sm text-blue-800">
-                            <p className="font-medium mb-1">Read-Only Access</p>
-                            <p className="text-blue-700">
-                                This is a read-only view of your attendance records. If you notice any discrepancies, 
-                                please contact HR for assistance. You cannot modify past attendance records.
-                            </p>
+                            <p className="font-medium mb-1">Attendance Summary</p>
+                            <ul className="list-disc list-inside space-y-1 text-blue-700">
+                                <li><strong>Work Days:</strong> Total working days in the month (excluding weekends)</li>
+                                <li><strong>Att. Days:</strong> Days you actually clocked in/out</li>
+                                <li><strong>Attendance Rate:</strong> (Att. Days / Work Days) × 100%</li>
+                                <li>This is a read-only view. Contact HR for any discrepancies.</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
