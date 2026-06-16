@@ -16,6 +16,7 @@ interface AttendanceRecord {
     employee_id: string;
     employee_name: string;
     department_name: string | null;
+    work_days: number;
     total_days: number;
     present_days: number;
     late_days: number;
@@ -27,9 +28,13 @@ interface AttendanceRecord {
 export const dynamic = 'force-dynamic';
 
 export default function ReportsPage() {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1;
+
     const [departments, setDepartments] = useState<Department[]>([]);
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+    const [selectedYear, setSelectedYear] = useState(currentYear);
+    const [selectedMonth, setSelectedMonth] = useState(currentMonth);
     const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
     const [isGenerating, setIsGenerating] = useState(false);
     const [reportData, setReportData] = useState<AttendanceRecord[]>([]);
@@ -58,15 +63,26 @@ export default function ReportsPage() {
         setMessage(null);
 
         try {
+            // Validate that selected date is not in the future
+            if (selectedYear > currentYear || (selectedYear === currentYear && selectedMonth > currentMonth)) {
+                setMessage({
+                    type: 'error',
+                    text: 'Cannot generate report for future dates. Please select a past or current month.',
+                });
+                setIsGenerating(false);
+                return;
+            }
+
             // Calculate date range
             const startDate = new Date(selectedYear, selectedMonth - 1, 1).toISOString().split('T')[0];
             const endDate = new Date(selectedYear, selectedMonth, 0).toISOString().split('T')[0];
 
-            // Fetch all employees
+            // Fetch all employees (only employee role, exclude admins)
             let employeesQuery = supabase
                 .from('admin_employee_details')
                 .select('employee_id, employee_name, department_name, employee_status')
-                .eq('employee_status', 'active');
+                .eq('employee_status', 'active')
+                .eq('role', 'employee');
 
             if (selectedDepartment !== 'all') {
                 employeesQuery = employeesQuery.eq('department_id', selectedDepartment);
@@ -125,6 +141,7 @@ export default function ReportsPage() {
                     employee_id: employee.employee_id,
                     employee_name: employee.employee_name,
                     department_name: employee.department_name || 'No Department',
+                    work_days: workDays,
                     total_days: totalDays,
                     present_days: presentDays,
                     late_days: lateDays,
@@ -166,11 +183,12 @@ export default function ReportsPage() {
         // Table
         autoTable(doc, {
             startY: 55,
-            head: [['Employee ID', 'Name', 'Department', 'Total Days', 'Present', 'Late', 'Leave', 'Absent', 'Rate %']],
+            head: [['Employee ID', 'Name', 'Department', 'Work Days', 'Attendance Days', 'Present', 'Late', 'Leave', 'Absent', 'Rate %']],
             body: reportData.map(record => [
                 record.employee_id,
                 record.employee_name,
                 record.department_name,
+                record.work_days.toString(),
                 record.total_days.toString(),
                 record.present_days.toString(),
                 record.late_days.toString(),
@@ -178,7 +196,7 @@ export default function ReportsPage() {
                 record.absent_days.toString(),
                 record.attendance_rate.toString() + '%',
             ]),
-            styles: { fontSize: 8 },
+            styles: { fontSize: 7 },
             headStyles: { fillColor: [59, 130, 246] },
         });
 
@@ -188,11 +206,12 @@ export default function ReportsPage() {
     };
 
     const exportToCSV = () => {
-        const headers = ['Employee ID', 'Name', 'Department', 'Total Days', 'Present', 'Late', 'Leave', 'Absent', 'Attendance Rate'];
+        const headers = ['Employee ID', 'Name', 'Department', 'Work Days', 'Attendance Days', 'Present', 'Late', 'Leave', 'Absent', 'Attendance Rate'];
         const rows = reportData.map(record => [
             record.employee_id,
             record.employee_name,
             record.department_name,
+            record.work_days,
             record.total_days,
             record.present_days,
             record.late_days,
@@ -218,6 +237,36 @@ export default function ReportsPage() {
     const getMonthName = (month: number) => {
         const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         return months[month - 1];
+    };
+
+    // Generate available years (from 2024 to current year)
+    const getAvailableYears = () => {
+        const startYear = 2024;
+        const years = [];
+        for (let year = startYear; year <= currentYear; year++) {
+            years.push(year);
+        }
+        return years;
+    };
+
+    // Generate available months based on selected year
+    const getAvailableMonths = () => {
+        if (selectedYear === currentYear) {
+            // For current year, only show months up to current month
+            return Array.from({ length: currentMonth }, (_, i) => i + 1);
+        } else {
+            // For past years, show all 12 months
+            return Array.from({ length: 12 }, (_, i) => i + 1);
+        }
+    };
+
+    // Adjust selected month when year changes
+    const handleYearChange = (year: number) => {
+        setSelectedYear(year);
+        // If switching to current year and selected month is in the future, reset to current month
+        if (year === currentYear && selectedMonth > currentMonth) {
+            setSelectedMonth(currentMonth);
+        }
     };
 
     const getTotalStats = () => {
@@ -280,10 +329,10 @@ export default function ReportsPage() {
                             </label>
                             <select
                                 value={selectedYear}
-                                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                onChange={(e) => handleYearChange(Number(e.target.value))}
                                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
-                                {[2024, 2025, 2026, 2027].map(year => (
+                                {getAvailableYears().map(year => (
                                     <option key={year} value={year}>{year}</option>
                                 ))}
                             </select>
@@ -299,7 +348,7 @@ export default function ReportsPage() {
                                 onChange={(e) => setSelectedMonth(Number(e.target.value))}
                                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
-                                {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                                {getAvailableMonths().map(month => (
                                     <option key={month} value={month}>{getMonthName(month)}</option>
                                 ))}
                             </select>
@@ -431,7 +480,10 @@ export default function ReportsPage() {
                                             Department
                                         </th>
                                         <th className="text-center py-3 px-4 text-xs font-medium text-slate-500 uppercase">
-                                            Total Days
+                                            Work Days
+                                        </th>
+                                        <th className="text-center py-3 px-4 text-xs font-medium text-slate-500 uppercase">
+                                            Att. Days
                                         </th>
                                         <th className="text-center py-3 px-4 text-xs font-medium text-slate-500 uppercase">
                                             Present
@@ -446,7 +498,7 @@ export default function ReportsPage() {
                                             Absent
                                         </th>
                                         <th className="text-center py-3 px-4 text-xs font-medium text-slate-500 uppercase">
-                                            Att. Rate
+                                            Rate
                                         </th>
                                     </tr>
                                 </thead>
@@ -461,6 +513,9 @@ export default function ReportsPage() {
                                             </td>
                                             <td className="py-4 px-4 text-sm text-slate-600">
                                                 {record.department_name}
+                                            </td>
+                                            <td className="py-4 px-4 text-center text-sm font-medium text-slate-700">
+                                                {record.work_days}
                                             </td>
                                             <td className="py-4 px-4 text-center text-sm font-medium text-slate-900">
                                                 {record.total_days}
@@ -507,7 +562,8 @@ export default function ReportsPage() {
                         <div className="text-sm text-blue-800">
                             <p className="font-medium mb-1">Report Information</p>
                             <ul className="list-disc list-inside space-y-1 text-blue-700">
-                                <li>Reports include only active employees</li>
+                                <li>Reports include only active employees (excludes administrators)</li>
+                                <li>Only past and current months are available for reporting</li>
                                 <li>Absent days calculated based on workdays (excluding weekends)</li>
                                 <li>Attendance rate = (Total attendance days / Workdays) × 100</li>
                                 <li>Export to PDF for official records or CSV for spreadsheet analysis</li>
