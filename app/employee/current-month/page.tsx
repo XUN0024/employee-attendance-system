@@ -12,6 +12,7 @@ export default function CurrentMonthPage() {
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const [attendance, setAttendance] = useState<Attendance[]>([]);
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
     const [stats, setStats] = useState<AttendanceStats>({
         workDays: 0,
         totalDays: 0,
@@ -149,6 +150,16 @@ export default function CurrentMonthPage() {
         
         return !(selectedYear === currentYear && selectedMonth === currentMonth);
     };
+
+    const toggleSortOrder = () => {
+        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    };
+
+    const sortedAttendance = [...attendance].sort((a, b) => {
+        const dateA = new Date(a.attendance_date).getTime();
+        const dateB = new Date(b.attendance_date).getTime();
+        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    });
 
     if (isLoading) {
         return (
@@ -291,12 +302,22 @@ export default function CurrentMonthPage() {
                     </div>
                 </div>
 
+                {/* Employee Table */}
                 <div className="bg-white rounded-lg border border-zinc-200">
-                    <div className="p-6 border-b border-zinc-200">
-                        <h2 className="text-lg font-semibold text-slate-900">Daily Records</h2>
-                        <p className="text-sm text-slate-500 mt-1">
-                            Read-only view of your attendance records
-                        </p>
+                    <div className="p-6 border-b border-zinc-200 flex items-center justify-between">
+                        <div>
+                            <h2 className="text-lg font-semibold text-slate-900">Daily Records</h2>
+                            <p className="text-sm text-slate-500 mt-1">
+                                Read-only view of your attendance records
+                            </p>
+                        </div>
+                        <button
+                            onClick={toggleSortOrder}
+                            className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium text-slate-700"
+                        >
+                            <Calendar className="h-4 w-4" />
+                            {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
+                        </button>
                     </div>
                     
                     {attendance.length === 0 ? (
@@ -317,7 +338,7 @@ export default function CurrentMonthPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-zinc-100">
-                                    {attendance.map((record) => (
+                                    {sortedAttendance.map((record) => (
                                         <tr key={record.attendance_id} className="hover:bg-slate-50 transition-colors">
                                             <td className="py-4 px-4 text-sm font-medium text-slate-900">
                                                 {formatDate(record.attendance_date)}
