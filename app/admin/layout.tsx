@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, UserPlus, FileText, LogOut, ChevronLeft, ChevronRight, ClipboardCheck } from 'lucide-react';
+import { LayoutDashboard, Users, UserPlus, FileText, LogOut, ChevronLeft, ChevronRight, ClipboardCheck, Lock } from 'lucide-react';
 
 const menuItems = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -11,6 +11,7 @@ const menuItems = [
     { href: '/admin/add-employee', label: 'Add Employee', icon: UserPlus },
     { href: '/admin/leave-approvals', label: 'Leave Approvals', icon: ClipboardCheck },
     { href: '/admin/reports', label: 'Reports', icon: FileText },
+    { href: '/admin/change-password', label: 'Change Password', icon: Lock },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
