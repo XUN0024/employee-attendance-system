@@ -38,7 +38,7 @@ export default function LoginPage() {
             if (result.success && result.employee) {
                 // Store minimal employee info in localStorage for client-side use
                 localStorage.setItem('employee', JSON.stringify(result.employee));
-                
+
                 // Redirect based on role (middleware will enforce)
                 if (result.employee.role === 'admin') {
                     router.push('/admin/dashboard');
@@ -75,8 +75,8 @@ export default function LoginPage() {
                             onClick={() => setRole('employee')}
                             disabled={isLoading}
                             className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all ${role === 'employee'
-                                    ? 'bg-white text-blue-600 shadow-md'
-                                    : 'text-slate-600 hover:text-slate-900'
+                                ? 'bg-white text-blue-600 shadow-md'
+                                : 'text-slate-600 hover:text-slate-900'
                                 } disabled:opacity-50`}
                         >
                             <User size={18} />
@@ -87,8 +87,8 @@ export default function LoginPage() {
                             onClick={() => setRole('admin')}
                             disabled={isLoading}
                             className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-all ${role === 'admin'
-                                    ? 'bg-white text-blue-600 shadow-md'
-                                    : 'text-slate-600 hover:text-slate-900'
+                                ? 'bg-white text-blue-600 shadow-md'
+                                : 'text-slate-600 hover:text-slate-900'
                                 } disabled:opacity-50`}
                         >
                             <Shield size={18} />

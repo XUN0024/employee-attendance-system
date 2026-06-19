@@ -1,6 +1,6 @@
 'use client';
 
-import { Calendar, Clock, CheckCircle2, ArrowRight, User, TrendingUp, Zap } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, ArrowRight, User, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { getTodayAttendance } from '@/lib/attendance';
@@ -120,63 +120,6 @@ export default function EmployeeDashboard() {
                         subtitle="This month"
                         color="amber"
                     />
-                </div>
-
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden">
-                    {/* Header with blue gradient */}
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-6">
-                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                            <TrendingUp className="h-6 w-6" />
-                            Recent Attendance Activity
-                        </h2>
-                        <p className="text-blue-100 text-sm mt-1">Your attendance records from the past week</p>
-                    </div>
-                    
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="bg-blue-50 border-b-2 border-blue-100">
-                                    <th className="text-left py-4 px-6 text-xs font-bold text-blue-900 uppercase tracking-wider">
-                                        Date
-                                    </th>
-                                    <th className="text-left py-4 px-6 text-xs font-bold text-blue-900 uppercase tracking-wider">
-                                        Day
-                                    </th>
-                                    <th className="text-left py-4 px-6 text-xs font-bold text-blue-900 uppercase tracking-wider">
-                                        Check In
-                                    </th>
-                                    <th className="text-left py-4 px-6 text-xs font-bold text-blue-900 uppercase tracking-wider">
-                                        Check Out
-                                    </th>
-                                    <th className="text-left py-4 px-6 text-xs font-bold text-blue-900 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                                {mockData.recentActivity.map((record, index) => (
-                                    <tr key={index} className="hover:bg-blue-50/50 transition-colors duration-150">
-                                        <td className="py-4 px-6 text-sm font-semibold text-slate-900">{record.date}</td>
-                                        <td className="py-4 px-6 text-sm text-slate-600">{record.day}</td>
-                                        <td className="py-4 px-6 text-sm font-medium text-slate-900">{record.checkIn}</td>
-                                        <td className="py-4 px-6 text-sm font-medium text-slate-900">{record.checkOut}</td>
-                                        <td className="py-4 px-6">
-                                            <span
-                                                className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm ${record.status === 'On Time'
-                                                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                                                    : record.status === 'Late'
-                                                        ? 'bg-amber-100 text-amber-700 border border-amber-200'
-                                                        : 'bg-slate-100 text-slate-600 border border-slate-200'
-                                                    }`}
-                                            >
-                                                {record.status}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
 
                 {/* Enhanced CTA Card */}
