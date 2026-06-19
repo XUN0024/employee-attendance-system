@@ -101,10 +101,11 @@ export default function ReportsPage() {
                 return;
             }
 
-            // Fetch attendance for each employee
+            // Fetch attendance and leave requests for each employee
             const reportRecords: AttendanceRecord[] = [];
 
             for (const employee of employees) {
+                // Fetch attendance records
                 const { data: attendance, error: attError } = await supabase
                     .from('attendances')
                     .select('*')
@@ -117,9 +118,45 @@ export default function ReportsPage() {
                     continue;
                 }
 
+                // Fetch approved leave requests for this month
+                const { data: leaveRequests, error: leaveError } = await supabase
+                    .from('leave_requests')
+                    .select('*')
+                    .eq('employee_id', employee.employee_id)
+                    .eq('leave_status', 'Approved')
+                    .or(`start_date.lte.${endDate},end_date.gte.${startDate}`);
+
+                if (leaveError) {
+                    console.error('Error fetching leave requests:', leaveError);
+                }
+
+                // Calculate leave days from approved leave requests
+                let leaveDaysFromRequests = 0;
+                if (leaveRequests && leaveRequests.length > 0) {
+                    const monthStart = new Date(selectedYear, selectedMonth - 1, 1);
+                    const monthEnd = new Date(selectedYear, selectedMonth, 0);
+
+                    for (const leave of leaveRequests) {
+                        const leaveStart = new Date(Math.max(new Date(leave.start_date).getTime(), monthStart.getTime()));
+                        const leaveEnd = new Date(Math.min(new Date(leave.end_date).getTime(), monthEnd.getTime()));
+
+                        // Count only weekdays
+                        for (let d = new Date(leaveStart); d <= leaveEnd; d.setDate(d.getDate() + 1)) {
+                            const dayOfWeek = d.getDay();
+                            if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                                leaveDaysFromRequests++;
+                            }
+                        }
+                    }
+                }
+
                 const presentDays = attendance?.filter(a => a.attendance_status === 'Present').length || 0;
                 const lateDays = attendance?.filter(a => a.attendance_status === 'Late').length || 0;
-                const leaveDays = attendance?.filter(a => a.attendance_status === 'Leave').length || 0;
+                const leaveDaysFromAttendance = attendance?.filter(a => a.attendance_status === 'Leave').length || 0;
+                
+                // Use the maximum between attendance records and leave requests
+                const leaveDays = Math.max(leaveDaysFromAttendance, leaveDaysFromRequests);
+                
                 const totalDays = attendance?.length || 0;
 
                 // Calculate work days in month (excluding weekends)
@@ -134,8 +171,14 @@ export default function ReportsPage() {
                     }
                 }
 
-                const absentDays = Math.max(0, workDays - totalDays);
-                const attendanceRate = workDays > 0 ? Math.round((totalDays / workDays) * 100) : 0;
+                // Absent days = workdays - (attendance records + approved leave days not yet in attendance)
+                // If leave is already in attendance, don't double count
+                const approvedLeaveNotInAttendance = Math.max(0, leaveDays - leaveDaysFromAttendance);
+                const absentDays = Math.max(0, workDays - totalDays - approvedLeaveNotInAttendance);
+                
+                // Attendance rate = (attendance records + approved leave) / workdays * 100
+                const effectiveAttendanceDays = totalDays + approvedLeaveNotInAttendance;
+                const attendanceRate = workDays > 0 ? Math.round((effectiveAttendanceDays / workDays) * 100) : 0;
 
                 reportRecords.push({
                     employee_id: employee.employee_id,
