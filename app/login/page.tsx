@@ -162,24 +162,18 @@ export default function LoginPage() {
                                     Signing in...
                                 </>
                             ) : (
-                                <>{role === 'employee' ? 'Clock In' : 'Sign In'}</>
+                                <>Sign In</>
                             )}
                         </button>
                     </form>
 
-                    <div className="mt-6 flex items-center justify-between text-sm">
+                    <div className="mt-6">
                         <Link
                             href="/"
-                            className="text-slate-600 hover:text-slate-800 hover:underline"
+                            className="text-slate-600 hover:text-slate-800 hover:underline text-sm"
                         >
                             ← Back to Home
                         </Link>
-                        <a
-                            href="#"
-                            className="text-blue-600 hover:text-blue-700 hover:underline"
-                        >
-                            Forgot password?
-                        </a>
                     </div>
                 </div>
 
