@@ -352,23 +352,63 @@ export async function getAttendanceStats(employeeId: string, year: number, month
 
         const presentDays = attendance.filter((a) => a.attendance_status === 'Present').length;
         const lateDays = attendance.filter((a) => a.attendance_status === 'Late').length;
-        const leaveDays = attendance.filter((a) => a.attendance_status === 'Leave').length;
+        const leaveDaysFromAttendance = attendance.filter((a) => a.attendance_status === 'Leave').length;
         const totalDays = attendance.length;
 
+        // Calculate start and end dates for the month
+        const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
+        const endDate = new Date(year, month, 0).toISOString().split('T')[0];
+
+        // Fetch approved leave requests for this month
+        const { data: leaveRequests } = await supabase
+            .from('leave_requests')
+            .select('*')
+            .eq('employee_id', employeeId)
+            .eq('leave_status', 'Approved')
+            .or(`start_date.lte.${endDate},end_date.gte.${startDate}`);
+
+        // Calculate leave days from approved leave requests
+        let leaveDaysFromRequests = 0;
+        if (leaveRequests && leaveRequests.length > 0) {
+            const monthStart = new Date(year, month - 1, 1);
+            const monthEnd = new Date(year, month, 0);
+
+            for (const leave of leaveRequests) {
+                const leaveStart = new Date(Math.max(new Date(leave.start_date).getTime(), monthStart.getTime()));
+                const leaveEnd = new Date(Math.min(new Date(leave.end_date).getTime(), monthEnd.getTime()));
+
+                // Count only weekdays
+                for (let d = new Date(leaveStart); d <= leaveEnd; d.setDate(d.getDate() + 1)) {
+                    const dayOfWeek = d.getDay();
+                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+                        leaveDaysFromRequests++;
+                    }
+                }
+            }
+        }
+
+        // Use the maximum between attendance records and leave requests
+        const leaveDays = Math.max(leaveDaysFromAttendance, leaveDaysFromRequests);
+
         // Calculate work days in the month (excluding weekends)
-        const startDate = new Date(year, month - 1, 1);
-        const endDate = new Date(year, month, 0);
+        const monthStart = new Date(year, month - 1, 1);
+        const monthEnd = new Date(year, month, 0);
         let workDays = 0;
 
-        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+        for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
             const dayOfWeek = d.getDay();
             if (dayOfWeek !== 0 && dayOfWeek !== 6) {
                 workDays++;
             }
         }
 
-        const absentDays = workDays - totalDays;
-        const attendanceRate = workDays > 0 ? Math.round((totalDays / workDays) * 100) : 0;
+        // Absent days = workdays - (attendance records + approved leave not yet in attendance)
+        const approvedLeaveNotInAttendance = Math.max(0, leaveDays - leaveDaysFromAttendance);
+        const absentDays = Math.max(0, workDays - totalDays - approvedLeaveNotInAttendance);
+
+        // Attendance rate = (attendance records + approved leave) / workdays * 100
+        const effectiveAttendanceDays = totalDays + approvedLeaveNotInAttendance;
+        const attendanceRate = workDays > 0 ? Math.round((effectiveAttendanceDays / workDays) * 100) : 0;
 
         return {
             workDays,

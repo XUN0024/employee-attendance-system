@@ -11,6 +11,7 @@ interface DashboardStats {
     totalAdmins: number;
     pendingLeaveRequests: number;
     todayAttendance: number;
+    todayApprovedLeave: number;
 }
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +22,7 @@ export default function AdminDashboard() {
         totalAdmins: 0,
         pendingLeaveRequests: 0,
         todayAttendance: 0,
+        todayApprovedLeave: 0,
     });
     const [isLoading, setIsLoading] = useState(true);
     const [recentActivity, setRecentActivity] = useState<any[]>([]);
@@ -32,16 +34,19 @@ export default function AdminDashboard() {
     const loadDashboardData = async () => {
         setIsLoading(true);
         try {
-            // Load total employees
+            // Load total employees (only employee role, excluding admins)
             const { data: employees, error: empError } = await supabase
                 .from('employees')
-                .select('employee_id, role');
+                .select('employee_id, role, employee_status');
 
             if (!empError && employees) {
+                const activeEmployees = employees.filter(e => e.employee_status === 'active');
+                const activeEmployeesOnly = activeEmployees.filter(e => e.role === 'employee');
+                
                 setStats(prev => ({
                     ...prev,
-                    totalEmployees: employees.length,
-                    totalAdmins: employees.filter(e => e.role === 'admin').length,
+                    totalEmployees: activeEmployeesOnly.length,
+                    totalAdmins: activeEmployees.filter(e => e.role === 'admin').length,
                 }));
             }
 
@@ -58,17 +63,44 @@ export default function AdminDashboard() {
                 }));
             }
 
-            // Load today's attendance count
+            // Load today's attendance count (only employees, not admins)
             const today = new Date().toISOString().split('T')[0];
             const { data: attendance, error: attError } = await supabase
                 .from('attendances')
-                .select('attendance_id')
-                .eq('attendance_date', today);
+                .select(`
+                    attendance_id,
+                    employee_id,
+                    employees!inner (role, employee_status)
+                `)
+                .eq('attendance_date', today)
+                .eq('employees.role', 'employee')
+                .eq('employees.employee_status', 'active');
 
             if (!attError && attendance) {
                 setStats(prev => ({
                     ...prev,
                     todayAttendance: attendance.length,
+                }));
+            }
+
+            // Load today's approved leave requests (only employees)
+            const { data: todayLeave, error: leaveError2 } = await supabase
+                .from('leave_requests')
+                .select(`
+                    leave_id,
+                    employee_id,
+                    employees!inner (role, employee_status)
+                `)
+                .eq('leave_status', 'Approved')
+                .lte('start_date', today)
+                .gte('end_date', today)
+                .eq('employees.role', 'employee')
+                .eq('employees.employee_status', 'active');
+
+            if (!leaveError2 && todayLeave) {
+                setStats(prev => ({
+                    ...prev,
+                    todayApprovedLeave: todayLeave.length,
                 }));
             }
 
@@ -228,11 +260,12 @@ export default function AdminDashboard() {
                         </div>
                         <p className="text-3xl font-semibold text-slate-900">
                             {stats.totalEmployees > 0 
-                                ? Math.round((stats.todayAttendance / stats.totalEmployees) * 100)
+                                ? Math.round(((stats.todayAttendance + stats.todayApprovedLeave) / stats.totalEmployees) * 100)
                                 : 0}%
                         </p>
                         <p className="text-sm text-slate-500 mt-1">
-                            Of total employees
+                            {stats.todayApprovedLeave > 0 && `${stats.todayApprovedLeave} on approved leave`}
+                            {stats.todayApprovedLeave === 0 && 'No approved leave today'}
                         </p>
                     </div>
                 </div>

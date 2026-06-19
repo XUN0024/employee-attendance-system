@@ -310,9 +310,11 @@ export default function AllEmployeesPage() {
                             </div>
                             <h3 className="text-sm font-medium text-slate-600">Total Employees</h3>
                         </div>
-                        <p className="text-3xl font-semibold text-slate-900">{employees.length}</p>
+                        <p className="text-3xl font-semibold text-slate-900">
+                            {employees.filter(e => e.role === 'employee').length}
+                        </p>
                         <p className="text-xs text-slate-500 mt-1">
-                            {employees.filter(e => e.employee_status === 'active').length} active
+                            {employees.filter(e => e.role === 'employee' && e.employee_status === 'active').length} active
                         </p>
                     </div>
 
@@ -324,7 +326,7 @@ export default function AllEmployeesPage() {
                             <h3 className="text-sm font-medium text-slate-600">Active</h3>
                         </div>
                         <p className="text-3xl font-semibold text-slate-900">
-                            {employees.filter(e => e.employee_status === 'active').length}
+                            {employees.filter(e => e.role === 'employee' && e.employee_status === 'active').length}
                         </p>
                     </div>
 
@@ -336,7 +338,7 @@ export default function AllEmployeesPage() {
                             <h3 className="text-sm font-medium text-slate-600">Inactive</h3>
                         </div>
                         <p className="text-3xl font-semibold text-slate-900">
-                            {employees.filter(e => e.employee_status === 'inactive').length}
+                            {employees.filter(e => e.role === 'employee' && e.employee_status === 'inactive').length}
                         </p>
                     </div>
 
