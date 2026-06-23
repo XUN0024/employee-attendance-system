@@ -42,7 +42,7 @@ export default function CurrentMonthPage() {
                 getMonthlyAttendance(employeeId, year, month),
                 getAttendanceStats(employeeId, year, month),
             ]);
-            
+
             setAttendance(attendanceData);
             setStats(statsData);
         } catch (err) {
@@ -65,12 +65,12 @@ export default function CurrentMonthPage() {
         const today = new Date();
         const currentYear = today.getFullYear();
         const currentMonth = today.getMonth() + 1;
-        
+
         // Don't allow navigating to future months
         if (selectedYear === currentYear && selectedMonth === currentMonth) {
             return;
         }
-        
+
         if (selectedMonth === 12) {
             setSelectedMonth(1);
             setSelectedYear(selectedYear + 1);
@@ -97,10 +97,10 @@ export default function CurrentMonthPage() {
             Absent: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', icon: XCircle },
             Leave: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', icon: Briefcase },
         };
-        
+
         const style = styles[status as keyof typeof styles] || styles.Present;
         const Icon = style.icon;
-        
+
         return (
             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium border ${style.bg} ${style.text} ${style.border}`}>
                 <Icon className="h-3.5 w-3.5" />
@@ -128,13 +128,13 @@ export default function CurrentMonthPage() {
 
     const calculateWorkingHours = (checkIn: string, checkOut: string | null) => {
         if (!checkOut) return '—';
-        
+
         const start = new Date(checkIn);
         const end = new Date(checkOut);
         const diff = end.getTime() - start.getTime();
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        
+
         return `${hours}h ${minutes}m`;
     };
 
@@ -147,7 +147,7 @@ export default function CurrentMonthPage() {
         const today = new Date();
         const currentYear = today.getFullYear();
         const currentMonth = today.getMonth() + 1;
-        
+
         return !(selectedYear === currentYear && selectedMonth === currentMonth);
     };
 
@@ -169,14 +169,14 @@ export default function CurrentMonthPage() {
                         <Skeleton className="h-9 w-64 mb-2" />
                         <Skeleton className="h-4 w-48" />
                     </div>
-                    
+
                     <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
                         <div className="flex items-center justify-between mb-6">
                             <Skeleton className="h-10 w-32 rounded-xl" />
                             <Skeleton className="h-8 w-48" />
                             <Skeleton className="h-10 w-32 rounded-xl" />
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
                             {[...Array(6)].map((_, i) => (
                                 <div key={i} className="bg-slate-50 rounded-xl p-4 border-l-4 border-slate-300">
@@ -186,7 +186,7 @@ export default function CurrentMonthPage() {
                             ))}
                         </div>
                     </div>
-                    
+
                     <TableSkeleton rows={10} />
                 </div>
             </div>
@@ -319,7 +319,7 @@ export default function CurrentMonthPage() {
                             {sortOrder === 'desc' ? 'Newest First' : 'Oldest First'}
                         </button>
                     </div>
-                    
+
                     {attendance.length === 0 ? (
                         <div className="p-12 text-center">
                             <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-3" />

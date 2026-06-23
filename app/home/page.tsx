@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Clock, ArrowRight, CheckCircle2, Wifi, Server } from 'lucide-react';
+import { Clock, ArrowRight, CheckCircle2, Server } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HomePage() {
@@ -49,14 +49,7 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                        <div className="bg-slate-50 rounded-lg p-4 flex items-start gap-3">
-                            <Wifi className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                            <div>
-                                <h3 className="font-medium text-slate-800 text-sm mb-1">Intranet Required</h3>
-                                <p className="text-xs text-slate-600">Must be connected to Corporate Intranet</p>
-                            </div>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                         <div className="bg-slate-50 rounded-lg p-4 flex items-start gap-3">
                             <Server className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                             <div>
